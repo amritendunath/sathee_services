@@ -1,0 +1,12 @@
+# FROM nginx:1.29
+
+# COPY ./default.conf /etc/nginx/conf.d/default.conf
+# COPY ./wait-for-it.sh /wait-for-it.sh
+
+# # CMD ["/bin/sh", "-c", "/wait-for-it.sh auth_service:5004 && /wait-for-it.sh agent_service:8000 && nginx -g 'daemon off;'"]
+# CMD ["/bin/sh", "-c", "/wait-for-it.sh auth_service:5004 && /wait-for-it.sh agent_service:8000 && /wait-for-it.sh record_service_node:7001 && nginx -g 'daemon off;'"]
+FROM nginx:1.29
+
+COPY ./default.conf /etc/nginx/conf.d/default.conf
+
+CMD ["nginx", "-g", "daemon off;"]
