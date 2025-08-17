@@ -8,7 +8,7 @@ on:
       - "auth_service/**"
       - "record_service_node/**"
       - "nginx/**"
-      - "docker-compose.yml"
+      - "docker compose.yml"
 
 jobs:
   deploy:
@@ -28,25 +28,25 @@ jobs:
 
             if echo "$CHANGED" | grep -q "agent_service/"; then
               echo "Rebuilding agent_service..."
-              docker-compose build agent_service
-              docker-compose up -d agent_service
+              docker compose build agent_service
+              docker compose up -d agent_service
             fi
 
             if echo "$CHANGED" | grep -q "auth_service/"; then
               echo "Rebuilding auth_service..."
-              docker-compose build auth_service
-              docker-compose up -d auth_service
+              docker compose build auth_service
+              docker compose up -d auth_service
             fi
 
             if echo "$CHANGED" | grep -q "record_service_node/"; then
               echo "Rebuilding record_service_node..."
-              docker-compose build record_services
-              docker-compose up -d record_services
+              docker compose build record_services
+              docker compose up -d record_services
             fi
 
-            if echo "$CHANGED" | grep -q "nginx/" || echo "$CHANGED" | grep -q "docker-compose.yml"; then
+            if echo "$CHANGED" | grep -q "nginx/" || echo "$CHANGED" | grep -q "docker compose.yml"; then
               echo "Rebuilding nginx..."
-              docker-compose up -d --build nginx
+              docker compose up -d --build nginx
             fi
 
             echo "Cleaning up unused Docker images/containers..."
