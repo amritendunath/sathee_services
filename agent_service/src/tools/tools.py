@@ -7,6 +7,7 @@ from service.hospital_search import locator
 from typing import Dict, Any, Optional, List
 # from tools.vectorstore import get_retriever
 from langchain_chroma.vectorstores import chromadb
+import os
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
@@ -32,6 +33,8 @@ def convert_datetime_format(dt_str):
 #     logger.info(f"✅ vector_tool results: {string_results}") 
 #     return string_results
 
+chroma_host=os.environ.get("CHROMADB_HOST")
+chroma_port=os.environ.get("CHROMADB_PORT")
 
 @tool  
 def vector_tool(query: str) -> str:
@@ -39,7 +42,7 @@ def vector_tool(query: str) -> str:
     logger.info(f"🔍 Direct ChromaDB query: {query}")
     
     try:
-        client = chromadb.HttpClient(host="host.docker.internal", port=8001)
+        client = chromadb.HttpClient(host=chroma_host, port=chroma_port)
         # collections = client.list_collections()
         collection = client.get_collection(name="langchain")
         
