@@ -1,0 +1,53 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - "agent_service/**"
+      - "auth_service/**"
+      - "record_service_node/**"
+      - "nginx/**"
+      - "docker-compose.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into EC2 and deploy
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd my_app_folder
+            git pull origin main
+
+            CHANGED=$(git diff --name-only HEAD~1 HEAD)
+
+            if echo "$CHANGED" | grep -q "agent_service/"; then
+              echo "Rebuilding agent_service..."
+              docker-compose build agent_service
+              docker-compose up -d agent_service
+            fi
+
+            if echo "$CHANGED" | grep -q "auth_service/"; then
+              echo "Rebuilding auth_service..."
+              docker-compose build auth_service
+              docker-compose up -d auth_service
+            fi
+
+            if echo "$CHANGED" | grep -q "record_service_node/"; then
+              echo "Rebuilding record_service_node..."
+              docker-compose build record_services
+              docker-compose up -d record_services
+            fi
+
+            if echo "$CHANGED" | grep -q "nginx/" || echo "$CHANGED" | grep -q "docker-compose.yml"; then
+              echo "Rebuilding nginx..."
+              docker-compose up -d --build nginx
+            fi
+
+            echo "Cleaning up unused Docker images/containers..."
+            docker system prune -af --volumes
