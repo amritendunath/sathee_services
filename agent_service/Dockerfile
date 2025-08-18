@@ -21,7 +21,7 @@ EXPOSE 8000
 # ENV FLASK_APP=your_app.py
 
 # Define the command to start the application
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8001"]
 # CMD ["python", "your_app.py"]  # Or "gunicorn --bind 0.0.0.0:5000 your_app:app" for production
 
 
