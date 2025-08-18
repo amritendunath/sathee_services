@@ -6,7 +6,7 @@ services:
       context: ./agent_service
       dockerfile: Dockerfile
     ports:
-      - "8000:8000"
+      - "8001:8001"
     env_file: ./agent_service/.env
     networks:
       - app_network
@@ -49,7 +49,7 @@ services:
     image: docer1st/openlifescience_medmcqa:v1
     container_name: chromadb_openlifescience_medmcqa
     ports:
-      - "8001:8000"
+      - "8000:8000"
     environment:
     - ANONYMIZED_TELEMETRY=FALSE
     restart: unless-stopped
