@@ -1,0 +1,18 @@
+name: Create Docker Network
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  create_network:
+    runs-on: ubuntu-latest
+    steps:
+      - name: SSH into EC2 and create network
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          script: |
+            docker network create mynet || true
