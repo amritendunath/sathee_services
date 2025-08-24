@@ -33,6 +33,7 @@ def convert_datetime_format(dt_str):
 #     logger.info(f"✅ vector_tool results: {string_results}") 
 #     return string_results
 
+
 chroma_host=os.environ.get("CHROMADB_HOST")
 chroma_port=os.environ.get("CHROMADB_PORT")
 
