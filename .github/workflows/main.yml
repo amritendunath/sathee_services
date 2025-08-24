@@ -2,17 +2,19 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
     paths:
       - 'services/agent_service/**'
       - 'services/auth_service/**'
       - 'services/nginx/**'
 
+permissions:
+  contents: read
+
 jobs:
   agent_service:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, 'agent_service') || github.event_name == 'push'
+    if: github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
 
