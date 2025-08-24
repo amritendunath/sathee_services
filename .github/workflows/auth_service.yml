@@ -1,4 +1,4 @@
-name: Deploy Agent Service
+name: CI/CD auth_service
 
 on:
   push:
