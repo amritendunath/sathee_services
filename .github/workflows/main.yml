@@ -4,11 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - 'services/agent_service/**'
+      - 'services/auth_service/**'
+      - 'services/nginx/**'
 
 jobs:
   agent_service:
     runs-on: ubuntu-latest
-    if: ${{ contains(join(github.event.commits.*.modified, ' '), 'services/agent_service/') }}
+    if: contains(github.event.head_commit.message, 'agent_service') || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
 
@@ -39,7 +43,7 @@ jobs:
 
   auth_service:
     runs-on: ubuntu-latest
-    if: ${{ contains(join(github.event.commits.*.modified, ' '), 'services/auth_service/') }}
+    if: contains(github.event.head_commit.message, 'auth_service') || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
 
@@ -70,7 +74,7 @@ jobs:
 
   nginx:
     runs-on: ubuntu-latest
-    if: ${{ contains(join(github.event.commits.*.modified, ' '), 'services/nginx/') }}
+    if: contains(github.event.head_commit.message, 'nginx') || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v3
 
