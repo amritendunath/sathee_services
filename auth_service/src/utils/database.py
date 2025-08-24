@@ -1,17 +1,16 @@
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
-from dotenv import load_dotenv
 import os
 import logging
 
 logger = logging.getLogger(__name__)
-load_dotenv()
+
 
 
 class Database:
     def __init__(self):
         self.client = MongoClient(
-            os.getenv("MONGODBURI"), server_api=ServerApi("1")
+            os.environ.get("MONGODBURI"), server_api=ServerApi("1")
         )  # Use ServerApi for compatibility
         self.db = self.client["sathi_chatbot"]  # Different database name for sathi
 
