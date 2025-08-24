@@ -36,9 +36,9 @@ class RouteUpdater:
             r (redis.Redis): Redis client instance.
             logger (logging.Logger): Logger instance.
         """
-        # self.r = r
-        # self.test = self.r.ping()
-        # self.logger = logger
+        self.r = r
+        self.test = self.r.ping()
+        self.logger = logger
 
 
 
@@ -63,9 +63,7 @@ class RouteUpdater:
         Returns:
             str: The next EHR ID as a zero-padded 7-digit string.
         """
-        # new_id = self.r.incr("ehr_id_counter:v1")
-        new_id = "111"
-        
+        new_id = self.r.incr("ehr_id_counter:v1")
         return str(new_id).zfill(7)
 
 
