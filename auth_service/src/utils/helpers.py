@@ -65,6 +65,7 @@ class RouteUpdater:
         """
         # new_id = self.r.incr("ehr_id_counter:v1")
         new_id = "111"
+        
         return str(new_id).zfill(7)
 
 
