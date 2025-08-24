@@ -3,6 +3,11 @@ name: CI/CD Pipeline
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'agent_service/**'
+      - 'auth_service/**'
+      - 'nginx/**'
+      - '.github/workflows/**'
 
 jobs:
   create_network:
@@ -20,6 +25,7 @@ jobs:
   deploy_auth:
     runs-on: ubuntu-latest
     needs: create_network
+    if: contains(github.event.commits.*.modified, 'auth_service/') || contains(github.event.commits.*.added, 'auth_service/') || contains(github.event.commits.*.removed, 'auth_service/')
     steps:
       - uses: actions/checkout@v3
       - name: Docker Login
@@ -50,6 +56,7 @@ jobs:
   deploy_agent:
     runs-on: ubuntu-latest
     needs: create_network
+    if: contains(github.event.commits.*.modified, 'agent_service/') || contains(github.event.commits.*.added, 'agent_service/') || contains(github.event.commits.*.removed, 'agent_service/')
     steps:
       - uses: actions/checkout@v3
       - name: Docker Login
@@ -80,6 +87,7 @@ jobs:
   deploy_nginx:
     runs-on: ubuntu-latest
     needs: create_network
+    if: contains(github.event.commits.*.modified, 'nginx/') || contains(github.event.commits.*.added, 'nginx/') || contains(github.event.commits.*.removed, 'nginx/')
     steps:
       - uses: actions/checkout@v3
       - name: Docker Login
