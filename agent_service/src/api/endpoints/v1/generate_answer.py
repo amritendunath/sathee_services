@@ -342,113 +342,137 @@ async def get_chat_history(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+#########################################################################################################
+#########################################################################################################
 # Chat Streaming Endpoint
-# @router.post("/generate-stream/", response_model=GenerationResponse, responses={500: {"model": ErrorResponse}})
-# async def generation_streaming(
-#         request: GenerationRequest,
-#         thread_id: str = Header("111222", alias="X-THREAD-ID"),
-#         token: str = Depends(oauth2_scheme),
-#         memory: AsyncSqliteSaver = Depends(get_memory),
-#         database: Database = Depends(get_database)
-# ):
+@router.post("/generate-stream/", response_model=GenerationResponse, responses={500: {"model": ErrorResponse}})
+async def generation_streaming(
+        request: GenerationRequest,
+        thread_id: str = Header("111222", alias="X-THREAD-ID"),
+        token: str = Depends(oauth2_scheme),
+        memory: AsyncSqliteSaver = Depends(get_memory),
+        database: Database = Depends(get_database)
+):
 
-#     query = request.query
-#     queryModeType = request.queryModeType
-#     logging.info(
-#         f"Received the Query - {query} & thread_id - {thread_id} and Type: {queryModeType}"
-#     )
-#     try:
-#         # Decode the token to get user information
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         user_email: str = payload.get("sub")
-#         ehr_id: str = payload.get("user_ehr_id")
-#         existing_session = await database.sessions.find_one({
-#             "user_id": ehr_id,
-#             "end_time": None
-#         })
-#         if not existing_session:
-#             session_id = str(uuid.uuid4())
-#             await database.sessions.insert_one({
-#                 "user_id":
-#                 ehr_id,
-#                 "session_id":
-#                 session_id,
-#                 "start_time":
-#                 datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-#                 "end_time":
-#                 None
-#             })
-#             logger.info(f"Created new session {session_id} for user {ehr_id}")
-#         else:
-#             session_id = existing_session["session_id"]
-#             logger.info(
-#                 f"Using existing session {session_id} for user {ehr_id}")
+    query = request.query
+    queryModeType = request.queryModeType
+    logging.info(
+        f"Received the Query - {query} & thread_id - {thread_id} and Type: {queryModeType}"
+    )
+    try:
+        # Decode the token to get user information
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_email: str = payload.get("sub")
+        ehr_id: str = payload.get("user_ehr_id")
+        existing_session = await database.sessions.find_one({
+            "user_id": ehr_id,
+            "end_time": None
+        })
+        if not existing_session:
+            session_id = str(uuid.uuid4())
+            await database.sessions.insert_one({
+                "user_id":
+                ehr_id,
+                "session_id":
+                session_id,
+                "start_time":
+                datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "end_time":
+                None
+            })
+            logger.info(f"Created new session {session_id} for user {ehr_id}")
+        else:
+            session_id = existing_session["session_id"]
+            logger.info(
+                f"Using existing session {session_id} for user {ehr_id}")
 
-#         inputs = [HumanMessage(content=query)]
-#         state = {
-#             "messages": inputs,
-#             "mode": queryModeType,
-#             "email": user_email,
-#             "user_id": ehr_id,
-#         }
-#         config = RunnableConfig(configurable={
-#             "thread_id": thread_id,
-#             "recursion_limit": 10
-#         })
-#         if queryModeType == 'quick':
-#             graph = build_graph_quick(quick_mode_llm, memory)
-#             response = await graph.ainvoke(input=state, config=config)
-#             logging.info("Generated Answer from Graph")
-#             dialog_states = response["dialog_state"]
-#             dialog_state = dialog_states[-1] if dialog_states else "primary_assistant"
-#             messages = response["messages"][-1].content
-#         elif queryModeType == 'think':
-#             graph = build_graph_think(think_mode_llm, memory)
-#             response = await graph.ainvoke(input=state, config=config)
-#             print("resonse,", response)
-#             logging.info("Generated Answer from Graph")
-#             dialog_states = response["dialog_state"]
-#             dialog_state = dialog_states[
-#                 -1] if dialog_states else "primary_assistant"
-#             messages = response["messages"][-1].content
+        inputs = [HumanMessage(content=query)]
+        state = {
+            "messages": inputs,
+            "mode": queryModeType,
+            "email": user_email,
+            "user_id": ehr_id,
+        }
+        config = RunnableConfig(configurable={
+            "thread_id": thread_id,
+            "recursion_limit": 10
+        })
+        if queryModeType == 'quick':
+            graph = build_graph_quick(quick_mode_llm, memory)
+            response = await graph.ainvoke(input=state, config=config)
+            logging.info("Generated Answer from Graph")
+            dialog_states = response["dialog_state"]
+            dialog_state = dialog_states[-1] if dialog_states else "primary_assistant"
+            messages = response["messages"][-1].content
+        elif queryModeType == 'think':
+            graph = build_graph_think(think_mode_llm, memory)
+            response = await graph.ainvoke(input=state, config=config)
+            print("resonse,", response)
+            logging.info("Generated Answer from Graph")
+            dialog_states = response["dialog_state"]
+            dialog_state = dialog_states[
+                -1] if dialog_states else "primary_assistant"
+            messages = response["messages"][-1].content
 
-#         await persist_chat_message(ehr_id, session_id, query, messages, database)
-#         return JSONResponse({
-#             "dialog_state": dialog_state if dialog_state else "",
-#             "answer": messages if messages else "",
-#             "session_id": session_id
-#         })
+        await persist_chat_message(ehr_id, session_id, query, messages, database)
+        return JSONResponse({
+            "dialog_state": dialog_state if dialog_state else "",
+            "answer": messages if messages else "",
+            "session_id": session_id
+        })
 
-#     except Exception as e:
-#         logger.error(f"Error in chat processing: {str(e)}")
-#         raise HTTPException(status_code=500,
-#                             detail=f"Failed to process chat: {str(e)}")
-
+    except Exception as e:
+        logger.error(f"Error in chat processing: {str(e)}")
+        raise HTTPException(status_code=500,
+                            detail=f"Failed to process chat: {str(e)}")
+########################################################################################################
+########################################################################################################
 run_configs = {}
 
 @router.post("/generate-stream/create", response_model=GraphResponse)
 async def create_streaming(
     request: StartRequest, 
-    token: Optional[str] = Depends(oauth2_scheme)):
+    token: Optional[str] = Depends(oauth2_scheme),
+    database: Database = Depends(get_database)
+    ):
     if not token:
         raise HTTPException(status_code=401, detail="Authentication required")
     try:
-        thread_id = str(uuid4())
+        # thread_id = str(uuid4())
         ehr_id = await extract_user_id_from_token(token)
         email = await extract_user_email_from_token(token)
         # payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         # logger.info(f"JWT Payload: {payload}")
         # email: str = payload.get("sub")
         # ehr_id: str = payload.get("user_ehr_id")
-        logger.info("email", email)
-        logger.info("ehr_id", ehr_id)
+        # logger.info("email", email)
+        # logger.info("ehr_id", ehr_id)
+        existing_session = await database.sessions.find_one({
+            "user_id": ehr_id,
+            "end_time": None
+        })
+        if not existing_session:
+            session_id = str(uuid.uuid4())
+            await database.sessions.insert_one({
+                "user_id": ehr_id,
+                "session_id": session_id,
+                "start_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "end_time": None
+            })
+            logger.info(f"Created new session {session_id} for user {ehr_id}")
+        else:
+            session_id = existing_session["session_id"]
+            logger.info(f"Using existing session {session_id} for user {ehr_id}")
+
+        thread_id = session_id    
 
         run_configs[thread_id] = {
             "type": "start",
             "query": request.query,
             "user_id": ehr_id,
             "email": email,
-            "queryModeType": request.queryModeType
+            "queryModeType": request.queryModeType,
+            "session_id": session_id
         }
 
         return GraphResponse(
@@ -481,14 +505,14 @@ async def generation_streaming(
         query = run_data["query"]
         user_id = run_data["user_id"]
         email = run_data["email"]
-
+        inputs = [HumanMessage(content=query)]
         # logger.info("queryModeType",queryModeType)
-        input_state = None
+        # input_state = None
         if run_data["type"] == "start":
             event_type = "start"
             user_id = run_data["user_id"]
             input_state = {
-                "messages":  run_data["query"],
+                "messages":  inputs,
                 "user_id": user_id, 
                 "email": email
             }
@@ -516,6 +540,9 @@ async def generation_streaming(
                 f"Using existing session {session_id} for user {user_id}")
 
         async def event_stream():
+            # session_id = run_data.get("session_id")
+            # if not session_id:
+            #     session_id = thread_id
             initial_data = json.dumps({'thread_id': thread_id})
             yield {"event": event_type, "data": initial_data}
             if queryModeType == "quick":

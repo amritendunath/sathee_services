@@ -30,4 +30,6 @@ jobs:
             docker rm agent_service || true
             docker run -d --name agent_service \
               --env-file /home/ec2-user/envs/agent_service.env \
-              -p 8001:8001 $IMAGE_NAME
+              -p 8001:8001 \
+              --network mynet \
+              $IMAGE_NAME
