@@ -105,8 +105,12 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=5004)
-
+    key = os.environ.get("SSL_KEY")
+    cert = os.environ.get("SSL_CERT")
+    if key and cert:
+        uvicorn.run(app, host="0.0.0.0", port=5004, ssl_keyfile=key, ssl_certfile=cert)
+    else:
+        print("SSL_KEY and SSL_CERT must be set in the environment")
 
 
 
