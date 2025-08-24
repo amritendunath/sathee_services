@@ -14,7 +14,7 @@ jobs:
       - name: Build and Push
         run: |
           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/ngnix:latest
-          docker build -t $IMAGE_NAME ./ngnix
+          docker build -t $IMAGE_NAME ./nginx
           docker push $IMAGE_NAME
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
