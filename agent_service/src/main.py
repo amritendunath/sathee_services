@@ -6,11 +6,13 @@ import asyncio
 import uvicorn
 from utils.database import Database 
 import logging
-from contextlib import asynccontextmanager 
+import os
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")  # Ensure basic logging is configured
 
+local = os.environ.get("LOCAL_URL")
+prod = os.environ.get("PROD_URL")
 # async def run_in_background():
 #     await asyncio.sleep(5)
 #     logger.info("I am running in background")
@@ -60,9 +62,14 @@ async def health_check():
     return PlainTextResponse("OK")
 
 
+origins = [
+  local,
+  prod
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -76,4 +83,10 @@ print("Backend API is running")
 asyncio.set_event_loop_policy(asyncio.DefaultEventLoopPolicy())
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    key = os.environ.get("SSL_KEY")
+    cert = os.environ.get("SSL_CERT")
+    if key and cert:
+        uvicorn.run("main:app", host="0.0.0.0", port=8001, ssl_keyfile=key, ssl_certfile=cert)
+    else:
+        print("SSL_KEY and SSL_CERT must be set in the environment")
+
