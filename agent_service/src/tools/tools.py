@@ -55,7 +55,7 @@ def vector_tool(query: str) -> str:
         # Direct query to ChromaDB
         results = collection.query(
             query_texts=[query],
-            # n_results=4,  # Adjust as needed
+            n_results=4,  # Adjust as needed
             # include=["documents", "metadatas"]
         )
         
