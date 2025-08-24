@@ -111,3 +111,4 @@ jobs:
               -v /etc/letsencrypt:/etc/letsencrypt:ro \
               --network mynet \
               $IMAGE_NAME
+              
