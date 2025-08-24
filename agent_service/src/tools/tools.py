@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, List
 # from tools.vectorstore import get_retriever
 from langchain_chroma.vectorstores import chromadb
 import os
+import json
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
