@@ -5,11 +5,31 @@ on:
     branches: [ "main" ]
     paths:
       - 'agent_service/**'
-      - 'auth_service/**'
+      - 'auth_service/**' 
       - 'nginx/**'
       - '.github/workflows/**'
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      auth_service: ${{ steps.changes.outputs.auth_service }}
+      agent_service: ${{ steps.changes.outputs.agent_service }}
+      nginx: ${{ steps.changes.outputs.nginx }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            auth_service:
+              - 'auth_service/**'
+            agent_service:
+              - 'agent_service/**'
+            nginx:
+              - 'nginx/**'
+
   create_network:
     runs-on: ubuntu-latest
     steps:
@@ -51,7 +71,8 @@ jobs:
 
   deploy_auth:
     runs-on: ubuntu-latest
-    needs: [create_network, deploy_databases]
+    needs: [changes, create_network, deploy_databases]
+    if: ${{ needs.changes.outputs.auth_service == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: Docker Login
@@ -81,7 +102,8 @@ jobs:
 
   deploy_agent:
     runs-on: ubuntu-latest
-    needs: [create_network, deploy_databases]
+    needs: [changes, create_network, deploy_databases]
+    if: ${{ needs.changes.outputs.agent_service == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: Docker Login
@@ -111,7 +133,8 @@ jobs:
 
   deploy_nginx:
     runs-on: ubuntu-latest
-    needs: [create_network, deploy_databases]
+    needs: [changes, create_network, deploy_databases]
+    if: ${{ needs.changes.outputs.nginx == 'true' }}
     steps:
       - uses: actions/checkout@v3
       - name: Docker Login
@@ -131,13 +154,155 @@ jobs:
             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
             IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/ngnix:latest
             docker pull $IMAGE_NAME
-            docker stop nginx || true
-            docker rm nginx || true
-            docker run -d --name nginx \
+            docker stop ngnix || true
+            docker rm ngnix || true
+            docker run -d --name ngnix \
               -p 80:80 -p 443:443 \
               -v /etc/letsencrypt:/etc/letsencrypt:ro \
               --network mynet \
               $IMAGE_NAME
+
+
+# name: CI/CD Pipeline
+
+# on:
+#   push:
+#     branches: [ "main" ]
+#     paths:
+#       - 'agent_service/**'
+#       - 'auth_service/**'
+#       - 'nginx/**'
+#       - '.github/workflows/**'
+
+# jobs:
+#   create_network:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: SSH into EC2 and create network
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USER }}
+#           key: ${{ secrets.EC2_KEY }}
+#           script: |
+#             docker network create mynet || true
+
+#   deploy_databases:
+#     runs-on: ubuntu-latest
+#     needs: create_network
+#     steps:
+#       - name: Deploy Redis to EC2
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USER }}
+#           key: ${{ secrets.EC2_KEY }}
+#           script: |
+#             # Deploy Redis
+#             docker stop redis || true
+#             docker rm redis || true
+#             docker run -d --name redis \
+#               -p 6379:6379 \
+#               --network mynet \
+#               -v redis_data:/data \
+#               redis:latest
+            
+#             # Wait for Redis to be ready
+#             echo "Waiting for Redis to be ready..."
+#             sleep 5
+            
+#             # Test Redis connection
+#             docker exec redis redis-cli ping || true
+
+#   deploy_auth:
+#     runs-on: ubuntu-latest
+#     needs: [create_network, deploy_databases]
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Docker Login
+#         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+#       - name: Build and Push Auth Service
+#         run: |
+#           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/auth_service:latest
+#           docker build -t $IMAGE_NAME ./auth_service
+#           docker push $IMAGE_NAME
+#       - name: Deploy Auth Service to EC2
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USER }}
+#           key: ${{ secrets.EC2_KEY }}
+#           script: |
+#             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
+#             IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/auth_service:latest
+#             docker pull $IMAGE_NAME
+#             docker stop auth_service || true
+#             docker rm auth_service || true
+#             docker run -d --name auth_service \
+#               --env-file /home/ec2-user/envs/auth_service.env \
+#               -p 5004:5004 \
+#               --network mynet \
+#               $IMAGE_NAME
+
+#   deploy_agent:
+#     runs-on: ubuntu-latest
+#     needs: [create_network, deploy_databases]
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Docker Login
+#         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+#       - name: Build and Push Agent Service
+#         run: |
+#           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/agent_service:latest
+#           docker build -t $IMAGE_NAME ./agent_service
+#           docker push $IMAGE_NAME
+#       - name: Deploy Agent Service to EC2
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USER }}
+#           key: ${{ secrets.EC2_KEY }}
+#           script: |
+#             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
+#             IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/agent_service:latest
+#             docker pull $IMAGE_NAME
+#             docker stop agent_service || true
+#             docker rm agent_service || true
+#             docker run -d --name agent_service \
+#               --env-file /home/ec2-user/envs/agent_service.env \
+#               -p 8001:8001 \
+#               --network mynet \
+#               $IMAGE_NAME
+
+#   deploy_nginx:
+#     runs-on: ubuntu-latest
+#     needs: [create_network, deploy_databases]
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Docker Login
+#         run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+#       - name: Build and Push Nginx
+#         run: |
+#           IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/ngnix:latest
+#           docker build -t $IMAGE_NAME ./nginx
+#           docker push $IMAGE_NAME
+#       - name: Deploy Nginx to EC2
+#         uses: appleboy/ssh-action@v1.0.3
+#         with:
+#           host: ${{ secrets.EC2_HOST }}
+#           username: ${{ secrets.EC2_USER }}
+#           key: ${{ secrets.EC2_KEY }}
+#           script: |
+#             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
+#             IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/ngnix:latest
+#             docker pull $IMAGE_NAME
+#             docker stop nginx || true
+#             docker rm nginx || true
+#             docker run -d --name nginx \
+#               -p 80:80 -p 443:443 \
+#               -v /etc/letsencrypt:/etc/letsencrypt:ro \
+#               --network mynet \
+#               $IMAGE_NAME
 
 # name: CI/CD Pipeline
 
