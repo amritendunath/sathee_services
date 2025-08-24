@@ -131,9 +131,9 @@ jobs:
             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
             IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/ngnix:latest
             docker pull $IMAGE_NAME
-            docker stop ngnix || true
-            docker rm ngnix || true
-            docker run -d --name ngnix \
+            docker stop nginx || true
+            docker rm nginx || true
+            docker run -d --name nginx \
               -p 80:80 -p 443:443 \
               -v /etc/letsencrypt:/etc/letsencrypt:ro \
               --network mynet \
