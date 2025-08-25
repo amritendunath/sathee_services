@@ -57,6 +57,7 @@ jobs:
             docker stop redis || true
             docker rm redis || true
             docker run -d --name redis \
+              --restart unless-stopped \
               -p 6379:6379 \
               --network mynet \
               -v redis_data:/data \
@@ -95,6 +96,7 @@ jobs:
             docker stop auth_service || true
             docker rm auth_service || true
             docker run -d --name auth_service \
+              --restart unless-stopped \
               --env-file /home/ec2-user/envs/auth_service.env \
               -p 5004:5004 \
               --network mynet \
@@ -126,6 +128,7 @@ jobs:
             docker stop agent_service || true
             docker rm agent_service || true
             docker run -d --name agent_service \
+              --restart unless-stopped \
               --env-file /home/ec2-user/envs/agent_service.env \
               -p 8001:8001 \
               --network mynet \
@@ -157,6 +160,7 @@ jobs:
             docker stop ngnix || true
             docker rm ngnix || true
             docker run -d --name ngnix \
+              --restart unless-stopped \
               -p 80:80 -p 443:443 \
               -v /etc/letsencrypt:/etc/letsencrypt:ro \
               --network mynet \
