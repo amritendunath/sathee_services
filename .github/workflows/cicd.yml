@@ -64,9 +64,9 @@ jobs:
               redis:latest
 
             # Deploy Chroma
-            docker stop chromadb || true
-            docker rm chromadb || true
-            docker run -d --name chromadb \
+            docker stop chroma || true
+            docker rm chroma || true
+            docker run -d --name chroma \
               --restart unless-stopped \
               -p 8000:8000 \
               -e ANONYMIZED_TELEMETRY=FALSE \
@@ -82,7 +82,7 @@ jobs:
             docker exec redis redis-cli ping || true
             
             # Test Chroma connection (simple HTTP check)
-            docker exec chromadb curl -f http://localhost:8000/api/v1/heartbeat || true
+            docker exec chroma curl -f http://localhost:8000/api/v1/heartbeat || true
 
   deploy_auth:
     runs-on: ubuntu-latest
