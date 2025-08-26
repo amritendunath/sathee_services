@@ -39,6 +39,7 @@ def create_app():
         allow_headers=["*"],
     )
 
+
     # Access configurations from environment variables
     GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
     GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET")
