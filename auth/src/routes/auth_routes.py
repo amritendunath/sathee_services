@@ -20,7 +20,6 @@ logging.basicConfig(level=logging.INFO)
 # Create an APIRouter for auth routes
 auth_router = APIRouter(prefix="", tags=["auth"])
 
-
 class EmailVerificationRequest(BaseModel):
     email: str
     code: str 
