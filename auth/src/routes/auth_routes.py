@@ -79,8 +79,6 @@ async def twitter_authorize(request: Request, twitter_oauth: TwitterOAuth =  Dep
         raise HTTPException(status_code=500, detail="An error occurred")
 
 
-
-
 @auth_router.get("/login/google")
 async def google_login(request: Request, google_oauth: GoogleOAuth = Depends(get_google_oauth)):
     try:
