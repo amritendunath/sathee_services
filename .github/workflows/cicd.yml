@@ -23,10 +23,10 @@ jobs:
         id: changes
         with:
           filters: |
-            auth_service:
-              - 'auth_service/**'
-            agent_service:
-              - 'agent_service/**'
+            auth:
+              - 'auth/**'
+            agent:
+              - 'agent/**'
             nginx:
               - 'nginx/**'
 
