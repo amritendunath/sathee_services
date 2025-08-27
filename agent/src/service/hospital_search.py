@@ -47,6 +47,7 @@ class HospitalLocator:
     #     except Exception as e:
     #         return [{"error": f"Error searching hospitals: {str(e)}"}]
 
+
     def get_current_location(self) -> Optional[Tuple[float, float]]:
         try:
             # Try multiple geocoding services
