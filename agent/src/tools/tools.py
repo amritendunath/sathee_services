@@ -10,6 +10,9 @@ from langchain_chroma.vectorstores import chromadb
 import os
 import json
 
+chroma_host=os.environ.get("CHROMADB_HOST")
+chroma_port=os.environ.get("CHROMADB_PORT")
+
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -35,8 +38,6 @@ def convert_datetime_format(dt_str):
 #     return string_results
 
 
-chroma_host=os.environ.get("CHROMADB_HOST")
-chroma_port=os.environ.get("CHROMADB_PORT")
 
 @tool  
 def vector_tool(query: str) -> str:
@@ -56,7 +57,7 @@ def vector_tool(query: str) -> str:
         # Direct query to ChromaDB
         results = collection.query(
             query_texts=[query],
-            n_results=4,  # Adjust as needed
+            # n_results=4,  # Adjust as needed
             # include=["documents", "metadatas"]
         )
         
