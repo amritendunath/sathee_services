@@ -12,7 +12,6 @@ class Database:
             os.environ.get("MONGODBURI"), server_api=ServerApi("1")
         )  # Use ServerApi for compatibility
         self.db = self.client["sathi_chatbot"]  # Different database name for sathi
-
         # Collections
         self.users = self.db["users"]
         self.chats = self.db["chats"]
