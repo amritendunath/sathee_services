@@ -108,8 +108,8 @@ jobs:
             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
             IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/auth:latest
             docker pull $IMAGE_NAME
-            docker stop auth_service || true
-            docker rm auth_service || true
+            docker stop auth || true
+            docker rm atuh || true
             docker run -d --name auth \
               --restart unless-stopped \
               --env-file /home/ec2-user/envs/auth_service.env \
@@ -140,8 +140,8 @@ jobs:
             docker login -u "${{ secrets.DOCKER_USERNAME }}" -p "${{ secrets.DOCKER_PASSWORD }}"
             IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/agent:latest
             docker pull $IMAGE_NAME
-            docker stop agent_service || true
-            docker rm agent_service || true
+            docker stop agent || true
+            docker rm agent || true
             docker run -d --name agent \
               --restart unless-stopped \
               --env-file /home/ec2-user/envs/agent_service.env \
