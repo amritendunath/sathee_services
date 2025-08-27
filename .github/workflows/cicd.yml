@@ -13,8 +13,8 @@ jobs:
   changes:
     runs-on: ubuntu-latest
     outputs:
-      auth_service: ${{ steps.changes.outputs.auth_service }}
-      agent_service: ${{ steps.changes.outputs.agent_service }}
+      auth: ${{ steps.changes.outputs.auth }}
+      agent: ${{ steps.changes.outputs.agent }}
       nginx: ${{ steps.changes.outputs.nginx }}
     steps:
       - name: Checkout
