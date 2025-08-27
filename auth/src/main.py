@@ -18,6 +18,7 @@ from utils.helpers import RouteUpdater
 from starlette.middleware import Middleware
 from starlette.middleware.sessions import SessionMiddleware
 
+
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)  # Set to DEBUG to capture more detailed logs
 handler = logging.StreamHandler(sys.stdout)

@@ -17,7 +17,6 @@ prod = os.environ.get("PROD_URL")
 #     await asyncio.sleep(5)
 #     logger.info("I am running in background")
 
-
 # @asynccontextmanager
 # async def lifespan(app: FastAPI):
 #     logger.info("Lifespan event started.")  # Add log at the very beginning
