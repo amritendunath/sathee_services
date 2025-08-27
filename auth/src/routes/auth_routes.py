@@ -39,7 +39,6 @@ def get_ses_oauth(request: Request)-> EmailOAuth:
     return request.app.state.email_oauth
 
 
-
 @auth_router.get("/login/microsoft")
 async def microsoft_login(request: Request, microsoft_oauth: MicrosoftOAuth =  Depends(get_microsoft_oauth)):
     try:
