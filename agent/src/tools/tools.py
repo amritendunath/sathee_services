@@ -315,7 +315,7 @@ def find_nearby_hospital() -> List[Dict[str, Any]]:
         #     else locator.handle_hospital_query()
         # )
         result = (
-            locator.search_hospital_based_on_geocode()
+            locator.search_hospitals_based_on_zipcode()
         )
         print(f"Result from search_hospitals: {result}")  # Debug log
         if not result:
